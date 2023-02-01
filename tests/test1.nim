@@ -48,14 +48,14 @@ suite "select item":
     check res.idx == ans
     check res.val == list[ans]
 
-suite "select enum":
+suite "select ordinal enum":
   type
     testEnum = enum
-      item1
+      item1 = 5
       item2 = "itm2"
-      item3 = 5
+      item3
       item4
-      item5 = (10, "itm5")
+      item5 = "itm5"
       item6
 
   test "first":
@@ -74,4 +74,26 @@ suite "select enum":
     let
       ans = item5
       res = testEnum.select("Select " & $ans)
+    check res == ans
+
+suite "select holey enum":
+  type
+    holeyEnum = enum
+      holeyItem1
+      holeyItem2 = "itm2"
+      holeyItem3 = 5
+      holeyItem4
+      holeyItem5 = (10, "itm5")
+      holeyItem6
+
+  test "last":
+    let
+      ans = holeyEnum.high
+      res = holeyEnum.select(PressEnterMsg, ans)
+    check res == ans
+
+  test "select enum":
+    let
+      ans = holeyItem5
+      res = holeyEnum.select("Select " & $ans)
     check res == ans

@@ -1,5 +1,5 @@
 import
-  std / [strformat, terminal]
+  std / [terminal, enumutils, typetraits]
 
 proc show(item: string, prefix = "> ") =
   ## Show selected item.
@@ -80,40 +80,51 @@ proc select*(list: seq[string], message: string, idx = 0): tuple[val: string, id
   echo message
   return list.select(idx)
 
-proc select*(enm: type enum, val: enum): enum =
+proc select*[T: OrdinalEnum](enm: typedesc[T], val: T): T =
   ## Select enum.
-  var
-    list: seq[string]
-    idx, i, dummy = -1
+  var list: seq[string]
   for item in enm:
-    dummy.inc
-    if $item == "{dummy} (invalid data!)".fmt:
-      continue
-    i.inc
-    if item == val:
-      idx = i
     list.add $item
+  return enm(list.select(val.ord - enm.low.ord).idx + enm.low.ord)
 
-  let res = list.select(idx).idx
-  i = -1
-  dummy = -1
-  for item in enm:
-    dummy.inc
-    if $item == "{dummy} (invalid data!)".fmt:
-      continue
-    i.inc
-    if i == res:
-      return item
-
-proc select*(enm: type enum): enum =
+proc select*[T: OrdinalEnum](enm: typedesc[T]): T =
   ## Select enum.
-  enm.select(enm.low)
+  return enm.select(enm.low)
 
-proc select*(enm: type enum, message: string, val: enum): enum =
+proc select*[T: OrdinalEnum](enm: typedesc[T], message: string, val: T): T =
   ## Display message and select enum.
   echo message
   return enm.select(val)
 
-proc select*(enm: type enum, message: string): enum =
+proc select*[T: OrdinalEnum](enm: typedesc[T], message: string): T =
   ## Display message and select enum.
-  enm.select(message, enm.low)
+  return enm.select(message, enm.low)
+
+proc select*[T: HoleyEnum](enm: typedesc[T], val: T): T =
+  ## Select enum.
+  var
+    strList: seq[string]
+    enmList: seq[T]
+    idx, i = -1
+  {.push warning[HoleEnumConv]: off.}
+  for item in enumutils.items(enm):
+    strList.add $item
+    enmList.add item
+    i.inc
+    if item == val:
+      idx = i
+  {.pop.}
+  return enmList[strList.select(idx).idx]
+
+proc select*[T: HoleyEnum](enm: typedesc[T]): T =
+  ## Select enum.
+  return enm.select(enm.low)
+
+proc select*[T: HoleyEnum](enm: typedesc[T], message: string, val: T): T =
+  ## Display message and select enum.
+  echo message
+  return enm.select(val)
+
+proc select*[T: HoleyEnum](enm: typedesc[T], message: string): T =
+  ## Display message and select enum.
+  return enm.select(message, enm.low)
