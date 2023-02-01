@@ -24,6 +24,9 @@ proc select*(list: seq[string], idx = 0): tuple[val: string, idx: int] =
   while true:
     let ch = getch()
     case ch.ord
+    of 3:  # CTRL-C
+      stdout.eraseLine
+      raise newException(CatchableError, "Pressed Ctrl-C")
     of 13:  # Enter
       echo ""
       break

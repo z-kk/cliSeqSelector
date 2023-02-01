@@ -8,6 +8,13 @@ const
 suite "select item":
   let list = @["item1", "item2", "itm3", "itm4", "item5", "item6"]
 
+  test "cancel":
+    try:
+      discard list.select("Press Ctrl-C")
+      check false
+    except:
+      check getCurrentExceptionMsg() == "Pressed Ctrl-C"
+
   test "first":
     let
       ans = 0
